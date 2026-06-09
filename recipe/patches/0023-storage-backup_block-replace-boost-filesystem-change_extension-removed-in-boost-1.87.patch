@@ -1,0 +1,26 @@
+From 9d164e96236165e91c1a6bf3d9c87270bd853800 Mon Sep 17 00:00:00 2001
+From: tropicrainforest <tropicrainforest27017@gmail.com>
+Date: Sun, 7 Jun 2026 16:54:34 +0200
+Subject: [PATCH 23/28] storage/backup_block: replace
+ boost::filesystem::change_extension (removed in boost 1.87)
+
+backup_block.cpp called boost::filesystem::change_extension, which Boost removed
+in 1.87; conda-forge now ships Boost 1.88, so the call no longer compiles.
+Replace it with replace_extension.
+---
+ src/mongo/db/storage/backup_block.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/mongo/db/storage/backup_block.cpp b/src/mongo/db/storage/backup_block.cpp
+index 9b8dc29f..602d4f9d 100644
+--- a/src/mongo/db/storage/backup_block.cpp
++++ b/src/mongo/db/storage/backup_block.cpp
+@@ -59,7 +59,7 @@ std::string extractIdentFromPath(const boost::filesystem::path& dbpath,
+ 
+     // Remove the file extension and convert to generic form (i.e. replace "\" with "/"
+     // on windows, no-op on unix).
+-    return boost::filesystem::change_extension(identWithExtension, "").generic_string();
++    return identWithExtension.replace_extension("").generic_string();
+ }
+ 
+ }  // namespace details

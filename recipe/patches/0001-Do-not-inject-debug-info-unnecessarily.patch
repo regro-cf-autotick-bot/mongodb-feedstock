@@ -1,23 +1,25 @@
-From 842d9b3567b028966e70589dbe7b702633c457f4 Mon Sep 17 00:00:00 2001
+From 25f7901d8fba2278445269ff476034056b00a87f Mon Sep 17 00:00:00 2001
 From: Nehal J Wani <nehaljw.kkd1@gmail.com>
-Date: Sun, 24 May 2020 21:13:26 +0000
-Subject: [PATCH 01/19] Do not inject debug info unnecessarily
+Date: Sun, 7 Jun 2026 16:54:30 +0200
+Subject: [PATCH 01/28] Do not inject debug info unnecessarily
 
 Requires humongous amount of disk space for intermediate objects
+
+Co-authored-by: tropicrainforest <tropicrainforest27017@gmail.com>
 ---
  SConstruct | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/SConstruct b/SConstruct
-index 1288667f97e..42b83797ac6 100644
+index fd818ece..3b6afd49 100644
 --- a/SConstruct
 +++ b/SConstruct
-@@ -2485,7 +2485,7 @@ if env.TargetOSIs('posix'):
- 
-     # -Winvalid-pch Warn if a precompiled header (see Precompiled Headers) is found in the search path but can't be used.
-     env.Append( CCFLAGS=["-fasynchronous-unwind-tables",
--                         "-ggdb" if not env.TargetOSIs('emscripten') else "-g",
-+#                         "-ggdb" if not env.TargetOSIs('emscripten') else "-g",
-                          "-Wall",
-                          "-Wsign-compare",
-                          "-Wno-unknown-pragmas",
+@@ -3060,7 +3060,7 @@ if env.TargetOSIs('posix'):
+     env.Append(
+         CCFLAGS=[
+             "-fasynchronous-unwind-tables",
+-            "-g2" if not env.TargetOSIs('emscripten') else "-g",
++#            "-g2" if not env.TargetOSIs('emscripten') else "-g",
+             "-Wall",
+             "-Wsign-compare",
+             "-Wno-unknown-pragmas",

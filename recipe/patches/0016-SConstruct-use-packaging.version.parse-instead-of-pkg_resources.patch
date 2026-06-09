@@ -1,0 +1,25 @@
+From b05ef0f539bd7c76195f873e36e9d751f1a3f1d5 Mon Sep 17 00:00:00 2001
+From: tropicrainforest <tropicrainforest27017@gmail.com>
+Date: Sun, 7 Jun 2026 16:54:33 +0200
+Subject: [PATCH 16/28] SConstruct: use packaging.version.parse instead of
+ pkg_resources
+
+MongoDB's SConstruct parsed and compared version strings using pkg_resources,
+which setuptools has deprecated and no longer ships by default.
+---
+ SConstruct | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/SConstruct b/SConstruct
+index f63dd2c9..1cada324 100644
+--- a/SConstruct
++++ b/SConstruct
+@@ -19,7 +19,7 @@ import uuid
+ from datetime import datetime
+ from glob import glob
+ 
+-from pkg_resources import parse_version
++from packaging.version import parse as parse_version
+ 
+ import SCons
+ import SCons.Script

@@ -1,0 +1,48 @@
+From 2a5fc38c3600e277daf147bc67d17bf8afe3fa08 Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Sun, 7 Jun 2026 16:54:32 +0200
+Subject: [PATCH 11/28] add missing fstream headers
+
+Co-authored-by: tropicrainforest <tropicrainforest27017@gmail.com>
+---
+ src/mongo/db/auth/security_key_test.cpp   | 1 +
+ src/mongo/db/repl/tenant_file_cloner.h    | 1 +
+ src/mongo/logv2/shared_access_fstream.cpp | 1 +
+ 3 files changed, 3 insertions(+)
+
+diff --git a/src/mongo/db/auth/security_key_test.cpp b/src/mongo/db/auth/security_key_test.cpp
+index 7a33cfbb..7eabd9f3 100644
+--- a/src/mongo/db/auth/security_key_test.cpp
++++ b/src/mongo/db/auth/security_key_test.cpp
+@@ -30,6 +30,7 @@
+ #include "mongo/platform/basic.h"
+ 
+ #include <boost/filesystem.hpp>
++#include <boost/fstream.hpp>
+ #include <boost/filesystem/fstream.hpp>
+ 
+ #include "mongo/base/string_data.h"
+diff --git a/src/mongo/db/repl/tenant_file_cloner.h b/src/mongo/db/repl/tenant_file_cloner.h
+index 27ff89fb..e8d60412 100644
+--- a/src/mongo/db/repl/tenant_file_cloner.h
++++ b/src/mongo/db/repl/tenant_file_cloner.h
+@@ -30,6 +30,7 @@
+ #pragma once
+ 
+ #include <boost/filesystem.hpp>
++#include <fstream>
+ #include <boost/filesystem/fstream.hpp>
+ #include <memory>
+ #include <vector>
+diff --git a/src/mongo/logv2/shared_access_fstream.cpp b/src/mongo/logv2/shared_access_fstream.cpp
+index 2179e27f..ac703f29 100644
+--- a/src/mongo/logv2/shared_access_fstream.cpp
++++ b/src/mongo/logv2/shared_access_fstream.cpp
+@@ -35,6 +35,7 @@
+ 
+ #include <fcntl.h>
+ #include <filesystem>
++#include <fstream>
+ #include <io.h>
+ 
+ #include "mongo/util/text.h"
