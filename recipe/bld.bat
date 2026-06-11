@@ -18,7 +18,7 @@ set "_scons_xtra_flags=%_scons_xtra_flags% VERBOSE=on"
 set "_scons_xtra_flags=%_scons_xtra_flags% DESTDIR=%LIBRARY_PREFIX%"
 set "_scons_xtra_flags=%_scons_xtra_flags% MONGO_VERSION=%PKG_VERSION%"
 
-for %%v in (boost icu pcre snappy yaml zlib zstd abseil-cpp) do (
+for %%v in (boost icu pcre2 snappy yaml zlib zstd) do (
  set "_scons_xtra_flags=!_scons_xtra_flags! --use-system-%%v"
 )
 

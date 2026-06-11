@@ -1,13 +1,11 @@
 c_compiler:
 - gcc
 c_compiler_version:
-- '13'
+- '14'
 c_stdlib:
 - sysroot
 c_stdlib_version:
 - '2.17'
-cdt_name:
-- cos7
 channel_sources:
 - conda-forge
 channel_targets:
@@ -15,23 +13,21 @@ channel_targets:
 cxx_compiler:
 - gxx
 cxx_compiler_version:
-- '13'
+- '14'
 docker_image:
-- quay.io/condaforge/linux-anvil-cos7-x86_64
+- quay.io/condaforge/linux-anvil-x86_64:alma9
 github_actions_labels:
-- cirun-openstack-cpu-large
+- namespace-profile-16cpu-on-linux-64
 icu:
 - '75'
-libabseil:
-- '20240722'
 libboost_devel:
-- '1.86'
+- '1.88'
 libcurl:
 - '8'
 openssl:
-- '3'
-pcre:
-- '8'
+- '3.5'
+pcre2:
+- '10.47'
 snappy:
 - '1.2'
 target_platform:
@@ -39,8 +35,6 @@ target_platform:
 zip_keys:
 - - c_compiler_version
   - cxx_compiler_version
-- - c_stdlib_version
-  - cdt_name
 zlib:
 - '1'
 zstd:

@@ -1,0 +1,26 @@
+From 9ac92609a37474f8510e90034a65ebe78a14214a Mon Sep 17 00:00:00 2001
+From: tropicrainforest <tropicrainforest27017@gmail.com>
+Date: Sun, 7 Jun 2026 16:54:34 +0200
+Subject: [PATCH 20/28] repl/topology_coordinator: include member_data.h to
+ complete vector<MemberData> element
+
+topology_coordinator.h holds a std::vector<MemberData> but relied on a forward
+declaration of MemberData, leaving it incomplete where the vector is declared
+(clang-19 / libc++ 22). We add #include "member_data.h" so the element type
+is complete at that point.
+---
+ src/mongo/db/repl/topology_coordinator.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/mongo/db/repl/topology_coordinator.h b/src/mongo/db/repl/topology_coordinator.h
+index 727e2447..eaefd9b0 100644
+--- a/src/mongo/db/repl/topology_coordinator.h
++++ b/src/mongo/db/repl/topology_coordinator.h
+@@ -37,6 +37,7 @@
+ #include "mongo/client/read_preference.h"
+ #include "mongo/db/repl/hello_response.h"
+ #include "mongo/db/repl/last_vote.h"
++#include "mongo/db/repl/member_data.h"
+ #include "mongo/db/repl/repl_set_heartbeat_args_v1.h"
+ #include "mongo/db/repl/repl_set_heartbeat_response.h"
+ #include "mongo/db/repl/repl_set_request_votes_args.h"

@@ -9,15 +9,13 @@ channel_targets:
 cxx_compiler:
 - vs2022
 github_actions_labels:
-- cirun-openstack-cpu-large
+- namespace-profile-16cpu-on-win-64
 icu:
 - '75'
-libabseil:
-- '20240722'
 libboost_devel:
-- '1.86'
-pcre:
-- '8'
+- '1.88'
+pcre2:
+- '10.47'
 snappy:
 - '1.2'
 target_platform:

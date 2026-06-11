@@ -1,0 +1,23 @@
+From 97dce4f7293fcfa78f6a87f01818925d1675d73c Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Sun, 7 Jun 2026 16:54:32 +0200
+Subject: [PATCH 12/28] use same discovery mechanism for system-boost on win as
+
+Co-authored-by: tropicrainforest <tropicrainforest27017@gmail.com>
+---
+ src/third_party/SConscript | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/third_party/SConscript b/src/third_party/SConscript
+index 74808075..8c736652 100644
+--- a/src/third_party/SConscript
++++ b/src/third_party/SConscript
+@@ -423,7 +423,7 @@ boostEnv = env.Clone()
+ if use_system_version_of_library("boost"):
+     # On windows, we don't need the syslibdeps because autolib will select the right libraries
+     # for us automatically.
+-    if not env.TargetOSIs('windows'):
++    if True:
+         boostEnv = boostEnv.Clone(SYSLIBDEPS=[
+             env['LIBDEPS_BOOST_PROGRAM_OPTIONS_SYSLIBDEP'],
+             env['LIBDEPS_BOOST_FILESYSTEM_SYSLIBDEP'],

@@ -1,0 +1,49 @@
+From e708fbdcbb0831c76d859bfbee42222d27858266 Mon Sep 17 00:00:00 2001
+From: tropicrainforest <tropicrainforest27017@gmail.com>
+Date: Sun, 7 Jun 2026 16:54:35 +0200
+Subject: [PATCH 26/28] mozjs: constrain ProtectedData ==/!= for C++20 (MSVC
+ 14.4x)
+
+Windows/MSVC-only: backported from the 8.0 port, since 7.0 and 8.0 share the
+same affected code.
+
+Under C++20 the compiler synthesizes != from a defined ==, which makes mozjs's
+explicit operator!= on ProtectedData redundant and, under MSVC, ambiguous.
+---
+ .../extract/js/src/threading/ProtectedData.h      | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/src/third_party/mozjs/extract/js/src/threading/ProtectedData.h b/src/third_party/mozjs/extract/js/src/threading/ProtectedData.h
+index 3abc8d5d..a4251c08 100644
+--- a/src/third_party/mozjs/extract/js/src/threading/ProtectedData.h
++++ b/src/third_party/mozjs/extract/js/src/threading/ProtectedData.h
+@@ -46,9 +46,19 @@ class Mutex;
+     }                                        \
+   }
+ 
++#define DECLARE_ONE_EQ_OPERATOR(OP, T)              \
++  template <typename U>                             \
++    requires(!requires(const U& u) { u.ref(); })    \
++  bool operator OP(const U& other) const {          \
++    if constexpr (std::is_integral_v<T>) {          \
++      return ref() OP static_cast<T>(other);        \
++    } else {                                        \
++      return ref() OP other;                        \
++    }                                               \
++  }
++
+ #define DECLARE_BOOL_OPERATORS(T)  \
+-  DECLARE_ONE_BOOL_OPERATOR(==, T) \
+-  DECLARE_ONE_BOOL_OPERATOR(!=, T) \
++  DECLARE_ONE_EQ_OPERATOR(==, T)   \
+   DECLARE_ONE_BOOL_OPERATOR(<=, T) \
+   DECLARE_ONE_BOOL_OPERATOR(>=, T) \
+   DECLARE_ONE_BOOL_OPERATOR(<, T)  \
+@@ -380,6 +390,7 @@ using WriteOnceData = ProtectedDataWriteOnce<CheckUnprotected, T>;
+ 
+ #undef DECLARE_ASSIGNMENT_OPERATOR
+ #undef DECLARE_ONE_BOOL_OPERATOR
++#undef DECLARE_ONE_EQ_OPERATOR
+ #undef DECLARE_BOOL_OPERATORS
+ 
+ }  // namespace js
