@@ -1,4 +1,4 @@
-{% set version = "7.0.34" %}
+{% set version = "8.0.23" %}
 
 package:
   name: mongodb
@@ -6,118 +6,86 @@ package:
 
 source:
   url: https://github.com/mongodb/mongo/archive/refs/tags/r{{ version }}.tar.gz
-  sha256: d98f8904d1a0a5683ffd29b320fd1f3615f6090f6bd9447fd016b428e674a8a1
+  sha256: 11f28fb5f5f28ab69fb9818644f416b614580fb17bb7e46b6be93762c990b07d
   patches:
-    - patches/0001-Do-not-inject-debug-info-unnecessarily.patch
-    - patches/0002-Fix-icu-namespace-extension-for-un-vendored-icu.patch
-    - patches/0003-Make-SCons-inherit-environment-vars.patch
-    - patches/0004-Use-platform-specific-TimeStamp-implementation.patch
-    - patches/0005-Fix-icu-library-names-for-Windows.patch
-    - patches/0006-Don-t-force-disable-auto-linking-if-use-system-boost.patch
-    - patches/0007-MSVC-Don-t-generating-debug-info-forcefully.patch
-    - patches/0008-Disable-installer-on-Windows.patch
-    - patches/0009-Drop-strict-python-pkgs-requirements-check.patch
-    - patches/0010-Don-t-inject-ICU-Macros-if-using-pre-compiled-library.patch
-    - patches/0011-add-missing-fstream-headers.patch
-    - patches/0012-use-same-discovery-mechanism-for-system-boost-on-win-as.patch
-    - patches/0013-add-missing-include-for-abi-__cxa_demangle.patch
-    # backport https://github.com/mongodb/mongo/commit/814c1d2fc4463faeb42cc5a4f265e2800e29fc89
-    - patches/0014-SERVER-76473-Fix-compiling-S2-lib-for-Windows-with-VS2022.patch
-    - patches/0015-compatibility-for-boost-1.86.patch
-    - patches/0016-SConstruct-use-packaging.version.parse-instead-of-pkg_resources.patch
-    - patches/0017-document_value-template-ize-RCVector-to-defer-vector-Value-instantiation.patch
-    - patches/0018-ssl_types-make-SSLX509Name-Entry-operator-a-member.patch
-    - patches/0019-exec-near-define-SearchResult-in-the-header-so-priority_queue-sees-a-complete-type.patch
-    - patches/0020-repl-topology_coordinator-include-member_data.h-to-complete-vector-MemberData-element.patch
-    - patches/0021-pipeline-lite_parsed-out-of-line-dtor-so-vector-LiteParsedPipeline-instantiates-where-complete.patch
-    - patches/0022-s-write_ops-define-ChildWriteOp-before-WriteOp-so-vector-ChildWriteOp-is-complete.patch
-    - patches/0023-storage-backup_block-replace-boost-filesystem-change_extension-removed-in-boost-1.87.patch
-    - patches/0024-pcre-drop-ERROR_CONDITION_ATOMIC_ASSERTION_EXPECTED-removed-in-pcre2-10.45.patch
-    - patches/0025-mozjs-gate-wrapper-comparison-operators-ElementType-behind-DefineComparisonOps-for-MSVC-14.4x.patch  # [win]
-    - patches/0026-mozjs-constrain-ProtectedData-for-C-20-MSVC-14.4x.patch  # [win]
-    - patches/0027-resharding_util-split-deeply-nested-pipeline-literals-to-avoid-MSVC-C1060.patch  # [win]
-    - patches/0028-SConstruct-use-conda-activated-msvc-env.patch  # [win]
+    - patches/0001-community-remove-unguarded-enterprise-hdrs.patch
+    - patches/0002-disable-apple-toolchain-registration.patch  # [osx]
+    - patches/0003-add-rules-cc-bazel-dep.patch
+    - patches/0004-version-constants-gen-tolerate-cross-prefixed-compilers.patch
+    - patches/0005-mozjs-gate-comparison-operators-elementtype-for-msvc-14.4x.patch  # [win]
+    - patches/0006-mozjs-protecteddata-drop-redundant-operator-ne-cxx20.patch  # [win]
+    - patches/0007-resharding-util-split-nested-literals-for-msvc.patch  # [win]
 build:
   number: 0
-  detect_binary_files_with_prefix: false
   # MongoDB distributes ppc64le only for Enterprise Edition
   skip: True  # [ppc64le]
-  missing_dso_whitelist:   # [osx]
-    - /usr/lib/libresolv.9.dylib  # [osx]
 
 requirements:
   build:
     - {{ compiler('c') }}
-    - {{ stdlib("c") }}
     - {{ compiler('cxx') }}
-    - python 3.10.*
-    - ninja
-    - cheetah3
-    - packaging
-    - regex
-    - requirements-parser
-    - setuptools
-    - pymongo >=3.9
-    - psutil
-    - pyyaml >=3.0
+    - {{ stdlib('c') }}
+    # 8.0's .bazelversion pins bazel 7.5; 7.6+ drops flags mongo's .bazelrc uses.
+    - bazel =7.5
+    - bazel-toolchain  # [not win]
+    - python >=3.10
+    - pip
   host:
-    - libboost-devel
-    - icu
-    # Windows build uses WinHTTP
-    - libcurl  # [not win]
-    # MacOS uses 'Secure Transport'
-    # Windows uses 'SChannel'
-    - openssl  # [linux]
-    - pcre2
-    - snappy
-    - yaml-cpp
-    - zlib
-    - zstd
+    - openssl
+    - libcurl
+    - cyrus-sasl
 
 test:
   commands:
     - mongod --version
     - mongos --version
-    - mongod --help
-    - mongos --help
+    - mongod --help > /dev/null
+    - mongos --help > /dev/null
 
 about:
   home: https://www.mongodb.com/
   license: SSPL-1.0
   license_family: OTHER
+  # mongod/mongos statically link all vendored third-party libs. Per
+  # README.third_party.md these are covered by mongo's consolidated
+  # distsrc/THIRD-PARTY-NOTICES or each lib's own LICENSE (below). folly and
+  # zstd are not in THIRD-PARTY-NOTICES (added with the Bazel build), so their
+  # LICENSE files are listed explicitly.
   license_file:
     - LICENSE-Community.txt
-     # fmt can be unvendored after upgrading to >=4.3.3
-     # xref: https://github.com/mongodb/mongo/commit/eacfb9c5
-    - src/third_party/fmt/dist/LICENSE.rst
-     # Part of boost, but requires code changes to unvendor the dep or
-     # packaging asio as a separate package
-    - src/third_party/asio-master/asio/LICENSE_1_0.txt
-    # abseil is statically linked from the vendored copy (no longer unvendored)
-    - src/third_party/abseil-cpp/dist/LICENSE
-     # Can be unvendored, needs to be packaged
-    - {{ RECIPE_DIR }}/libstemmer_COPYING
-     # IMO, this one is okay, it isn't used anywhere but mongodb
-    - src/third_party/wiredtiger/LICENSE
-     # Can be packaged
-    - src/third_party/IntelRDFPMathLib20U1/eula.txt
-     # This one is a discontinued project
-    - src/third_party/libmongocrypt/dist/kms-message/COPYING
-    - src/third_party/libmongocrypt/dist/kms-message/THIRD_PARTY_NOTICES
-     # Can be packaged, but build system doesn't have --system flag for it
-    - src/third_party/s2/LICENSE-2.0.txt
-     # A consolidated version for all 3rd party with SHAs and license names
-     # (Not all of them are statically linked)
+    - distsrc/THIRD-PARTY-NOTICES
     - README.third_party.md
-  summary: A next-gen database that lets you do things you could never do before
+    - src/third_party/abseil-cpp/dist/LICENSE
+    - src/third_party/asio-master/asio/LICENSE_1_0.txt
+    - src/third_party/fmt/dist/LICENSE.rst
+    - src/third_party/folly/dist/LICENSE
+    - src/third_party/gperftools/dist/COPYING
+    - src/third_party/icu4c-57.1/LICENSE
+    - src/third_party/immer/dist/LICENSE
+    - src/third_party/IntelRDFPMathLib20U1/eula.txt
+    - src/third_party/libbson/dist/COPYING
+    - src/third_party/librdkafka/dist/LICENSE
+    - src/third_party/pcre2/LICENCE
+    - src/third_party/s2/LICENSE-2.0.txt
+    - src/third_party/snappy/dist/COPYING
+    - src/third_party/tcmalloc/dist/LICENSE
+    - src/third_party/timelib/dist/LICENSE.rst
+    - src/third_party/tomcrypt-1.18.2/LICENSE
+    - src/third_party/unwind/dist/COPYING
+    - src/third_party/wiredtiger/LICENSE
+    - src/third_party/yaml-cpp/yaml-cpp/LICENSE
+    - src/third_party/zstandard/zstd/COPYING
+  summary: The MongoDB Database
   description: |
     MongoDB is a general-purpose, document-based, distributed database built
     for modern application developers and for the cloud era. This package
     provides the community edition `mongod` server and `mongos` router.
-  doc_url: https://docs.mongodb.org/manual/
+    The legacy `mongo` shell was removed in MongoDB 8.0.
+  doc_url: https://docs.mongodb.com/
   dev_url: https://github.com/mongodb/mongo
 
 extra:
   recipe-maintainers:
     - nehaljwani
     - h-vetinari
+    - tropicrainforest
