@@ -7,15 +7,16 @@ Home: https://www.mongodb.com/
 
 Package license: SSPL-1.0
 
-Summary: A next-gen database that lets you do things you could never do before
+Summary: The MongoDB Database
 
 Development: https://github.com/mongodb/mongo
 
-Documentation: https://docs.mongodb.org/manual/
+Documentation: https://docs.mongodb.com/
 
 MongoDB is a general-purpose, document-based, distributed database built
 for modern application developers and for the cloud era. This package
 provides the community edition `mongod` server and `mongos` router.
+The legacy `mongo` shell was removed in MongoDB 8.0.
 
 
 Current build status
@@ -187,4 +188,5 @@ Feedstock Maintainers
 
 * [@h-vetinari](https://github.com/h-vetinari/)
 * [@nehaljwani](https://github.com/nehaljwani/)
+* [@tropicrainforest](https://github.com/tropicrainforest/)
 
