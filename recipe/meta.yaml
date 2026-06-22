@@ -39,8 +39,8 @@ test:
   commands:
     - mongod --version
     - mongos --version
-    - mongod --help > /dev/null
-    - mongos --help > /dev/null
+    - mongod --help
+    - mongos --help
 
 about:
   home: https://www.mongodb.com/
