@@ -1,5 +1,5 @@
 build_platform:
-  osx_arm64: osx_64
+  osx_64: osx_arm64
 conda_build:
   pkg_format: '2'
 conda_forge_output_validation: true
@@ -22,3 +22,10 @@ workflow_settings:
   pagefile_size:
     - value: 20
       os: win
+#bot:
+#  version_updates:
+#    sources:
+#      - github
+#    allowed_tag_globs:
+#      # Mongo's stable releases have this structure
+#      - "r*.0.*"

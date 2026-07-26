@@ -10,17 +10,9 @@ cxx_compiler:
 - vs2022
 github_actions_labels:
 - namespace-profile-16cpu-on-win-64
-icu:
-- '75'
-libboost_devel:
-- '1.88'
-pcre2:
-- '10.47'
-snappy:
-- '1.2'
+libcurl:
+- '8'
+openssl:
+- '3.5'
 target_platform:
 - win-64
-zlib:
-- '1'
-zstd:
-- '1.5'
