@@ -28,6 +28,9 @@ requirements:
     - bazel-toolchain  # [not win]
     - python >=3.10
     - pip
+    # Provides rg for the .auto_header generator invoked from build.sh, which
+    # calls it via RG_PATH. Without this package that step fails.
+    - ripgrep
   host:
     - openssl
     - libcurl

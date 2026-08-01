@@ -4,8 +4,38 @@ set -euxo pipefail
 # Skip mongo's tools/bazel wrapper guard so stock bazel works as $BAZEL_REAL.
 export BAZELISK_SKIP_WRAPPER=1
 
+# conda exports GCC/LD/NM/STRIP as bare names, and gen-bazel-toolchain copies
+# them into tool_path(), where Bazel resolves relative paths against
+# //bazel_toolchain and they do not exist. It already absolutizes CC.
+# TODO: fix upstream in conda-forge/bazel-toolchain; workaround here until then.
+for _tool in GCC LD NM STRIP; do
+  _resolved="$(command -v "${!_tool:-}" 2>/dev/null || true)"
+  if [ -n "${_resolved}" ]; then
+    export "${_tool}=${_resolved}"
+  fi
+done
+unset _tool _resolved
+
 # Generates the //bazel_toolchain package (conda compilers as a cc toolchain).
 gen-bazel-toolchain
+
+# 8.3+ generates per-package .auto_header/ Bazel packages at build time. Only
+# mongo's bazelisk wrapper runs the generator, and its output is gitignored, so
+# the tarball has none. RG_PATH/FORCE_NO_FD keep it off MongoDB's S3 bucket.
+export RG_PATH=rg
+export FORCE_NO_FD=1
+python -c "
+import sys; sys.path.insert(0, '.')
+from pathlib import Path
+from bazel.auto_header.auto_header import gen_auto_headers
+from bazel.auto_header.gen_all_headers import spawn_all_headers_thread
+root = Path.cwd()
+t, s = spawn_all_headers_thread(root)
+a = gen_auto_headers(root)
+t.join()
+if not (a['ok'] and s['ok']):
+    sys.exit('auto_header generation failed: %r %r' % (a['err'], s['err']))
+"
 
 DEFINES=(
   # Mongo derives MONGO_VERSION from `git describe`; empty in tarball builds.
@@ -16,6 +46,9 @@ WRAPPER_INDEPENDENCE=(
   # .bazelrc defaults --build_enterprise=True; mongo's wrapper injects =False
   # but the injection is unreliable through stock bazel.
   --build_enterprise=False
+  # The wrapper sets this when src/mongo/db/modules/atlas is absent, as here.
+  # Inert while build_enterprise=False; kept for parity with upstream.
+  --//bazel/config:build_atlas=False
   # Global select() with no_match_error in MONGO_LINUX_CC_COPTS, also applied
   # on macOS via MONGO_GLOBAL_COPTS.
   --//bazel/config:running_through_bazelisk=true
@@ -45,6 +78,14 @@ COMMON_BAZEL_ARGS=(
   --disable_warnings_as_errors=True
   --extra_toolchains=//bazel_toolchain:cc_cf_toolchain
   --extra_toolchains=//bazel_toolchain:cc_cf_host_toolchain
+  --verbose_failures
+  # Bazel passes external repo roots as -iquote, which angle-bracket includes
+  # never search. Mongo's own toolchain emits -isystem for them via its
+  # external_include_paths feature; bazel-toolchain has none. Needed for
+  # <absl/hash/hash.h> in src/mongo/base/string_data.h. "~" is Bazel 7 naming.
+  # TODO: add that feature upstream in conda-forge/bazel-toolchain.
+  --copt=-isystem
+  --copt=external/abseil-cpp~
 )
 
 case "$(uname -s)" in
@@ -113,6 +154,19 @@ Darwin)
   echo "Unsupported platform: $(uname -s)" >&2
   exit 1
   ;;
+esac
+
+case "${target_platform}" in
+  linux-64|osx-64)
+    # Mongo builds x86_64 with -march=sandybridge and its vendored snappy config
+    # hard-enables SSE4.2/SSSE3 to match. mongod has required AVX since 5.0, so
+    # nothing below sandybridge can run this anyway.
+    PLATFORM_TOOLCHAIN_FLAGS+=(
+      --copt=-march=sandybridge
+      --copt=-mtune=generic
+      --copt=-mprefer-vector-width=128
+    )
+    ;;
 esac
 
 BAZEL_ARGS=(
