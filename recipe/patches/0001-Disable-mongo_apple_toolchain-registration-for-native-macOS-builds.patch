@@ -1,7 +1,7 @@
-From b7f208068ee4a6bbb09f88f695607bcefcbb8583 Mon Sep 17 00:00:00 2001
+From 9044968e2950ea3329402214f8300f9da5c27bb8 Mon Sep 17 00:00:00 2001
 From: tropicrainforest <tropicrainforest27017@gmail.com>
-Date: Thu, 18 Jun 2026 23:08:27 +0200
-Subject: [PATCH 1/6] Disable mongo_apple_toolchain registration for native
+Date: Sat, 1 Aug 2026 18:10:50 +0200
+Subject: [PATCH 1/5] Disable mongo_apple_toolchain registration for native
  macOS builds
 
 The mongo_apple_toolchain (bazel/toolchains/cc/mongo_apple/

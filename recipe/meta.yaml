@@ -9,11 +9,10 @@ source:
   sha256: d0179a61d3e126a6fce328db38e5f7568f24dfb1a33748d1b994b7fe641c7d88
   patches:
     - patches/0001-Disable-mongo_apple_toolchain-registration-for-native-macOS-builds.patch  # [osx]
-    - patches/0002-Add-explicit-rules_cc-bazel_dep-for-apparent-name-resolution.patch
-    - patches/0003-Make-tool_to_path-basename-check-tolerate-cross-prefixed-compilers.patch
-    - patches/0004-mozjs-gate-wrapper-comparison-operators-ElementType-behind-DefineComparisonOps-for-MSVC-14.4x.patch  # [win]
-    - patches/0005-mozjs-constrain-ProtectedData-for-C-20-MSVC-14.4x.patch  # [win]
-    - patches/0006-resharding_util-split-deeply-nested-pipeline-literals-to-avoid-MSVC-C1060.patch  # [win]
+    - patches/0002-Make-tool_to_path-basename-check-tolerate-cross-prefixed-compilers.patch
+    - patches/0003-mozjs-gate-wrapper-comparison-operators-ElementType-behind-DefineComparisonOps-for-MSVC-14.4x.patch  # [win]
+    - patches/0004-mozjs-constrain-ProtectedData-for-C-20-MSVC-14.4x.patch  # [win]
+    - patches/0005-resharding_util-split-deeply-nested-pipeline-literals-to-avoid-MSVC-C1060.patch  # [win]
 build:
   number: 0
   # MongoDB distributes ppc64le only for Enterprise Edition
