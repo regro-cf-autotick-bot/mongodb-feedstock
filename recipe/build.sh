@@ -16,6 +16,22 @@ for _tool in GCC LD NM STRIP; do
 done
 unset _tool _resolved
 
+# Mongo's vendored third-party configs assume its own ISA baseline: snappy
+# hard-enables SSE4.2 on linux-64 and NEON-CRC32 on linux-aarch64. These go in
+# CFLAGS/CXXFLAGS, not --copt, because gen-bazel-toolchain strips -march/-mcpu/
+# -mtune when deriving the build (exec) toolchain, keeping them off the arm64
+# exec compiler when osx-64 cross-builds. macOS x86_64 needs nothing.
+case "${target_platform}" in
+  linux-64)       _isa="-march=sandybridge -mtune=generic -mprefer-vector-width=128" ;;
+  linux-aarch64)  _isa="-march=armv8.2-a -mtune=generic" ;;
+  *)              _isa="" ;;
+esac
+if [ -n "${_isa}" ]; then
+  export CFLAGS="${CFLAGS} ${_isa}"
+  export CXXFLAGS="${CXXFLAGS} ${_isa}"
+fi
+unset _isa
+
 # Generates the //bazel_toolchain package (conda compilers as a cc toolchain).
 gen-bazel-toolchain
 
@@ -82,10 +98,13 @@ COMMON_BAZEL_ARGS=(
   # Bazel passes external repo roots as -iquote, which angle-bracket includes
   # never search. Mongo's own toolchain emits -isystem for them via its
   # external_include_paths feature; bazel-toolchain has none. Needed for
-  # <absl/hash/hash.h> in src/mongo/base/string_data.h. "~" is Bazel 7 naming.
+  # <absl/hash/hash.h> in src/mongo/base/string_data.h and <src/core/...> in
+  # src/mongo/transport/grpc. "~" is Bazel 7 external repo naming.
   # TODO: add that feature upstream in conda-forge/bazel-toolchain.
   --copt=-isystem
   --copt=external/abseil-cpp~
+  --copt=-isystem
+  --copt=external/grpc~
 )
 
 case "$(uname -s)" in
@@ -147,6 +166,7 @@ Darwin)
     # xcode-select sets the system default but does not export the var.
     --action_env=DEVELOPER_DIR="${DEVELOPER_DIR:-$(xcode-select -p)}"
     --action_env=MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-11.0}"
+    --//bazel/config:linkstatic=True
   )
   ;;
 
@@ -154,19 +174,6 @@ Darwin)
   echo "Unsupported platform: $(uname -s)" >&2
   exit 1
   ;;
-esac
-
-case "${target_platform}" in
-  linux-64|osx-64)
-    # Mongo builds x86_64 with -march=sandybridge and its vendored snappy config
-    # hard-enables SSE4.2/SSSE3 to match. mongod has required AVX since 5.0, so
-    # nothing below sandybridge can run this anyway.
-    PLATFORM_TOOLCHAIN_FLAGS+=(
-      --copt=-march=sandybridge
-      --copt=-mtune=generic
-      --copt=-mprefer-vector-width=128
-    )
-    ;;
 esac
 
 BAZEL_ARGS=(
