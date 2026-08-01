@@ -25,6 +25,7 @@ set BAZEL_ARGS=^
  "--repo_env=BAZEL_VS=!VS_ROOT!" ^
  "--repo_env=BAZEL_VC=!VC_ROOT!" ^
  "--repo_env=BAZEL_VC_FULL_VERSION=!VC_VER!" ^
+ "--repo_env=BAZEL_WINSDK_FULL_VERSION=" ^
  --action_env=TMP=D:\mongo_tmp ^
  --action_env=TEMP=D:\mongo_tmp ^
  --repo_env=TMP=D:\mongo_tmp ^
