@@ -18,6 +18,8 @@ cxx_compiler:
 - clangxx
 cxx_compiler_version:
 - '19'
+github_actions_labels:
+- namespace-profile-12cpu-on-osx-arm64
 libcurl:
 - '8'
 macos_machine:
