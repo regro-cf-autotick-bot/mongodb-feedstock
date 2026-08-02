@@ -158,6 +158,12 @@ Darwin)
     # CacheCombinedExclusive and failing the static_assert at aligned.h:65
     # for the 16-byte NetworkCounter::Together.
     --cxxopt=-DMONGO_CONFIG_MAX_EXTENDED_ALIGNMENT=64
+    # Mongo links libraries as shared objects with symbols resolved later; its
+    # Linux toolchain passes -Wl,--allow-shlib-undefined for this and ld64 has
+    # no equivalent. Third-party .so links (tomcrypt) run in the exec
+    # configuration, which --linkopt does not reach.
+    --linkopt=-Wl,-undefined,dynamic_lookup
+    --host_linkopt=-Wl,-undefined,dynamic_lookup
   )
   PLATFORM_BAZEL_ARGS=(
     # Override .bazelrc :macos default of -c dbg.
@@ -166,7 +172,6 @@ Darwin)
     # xcode-select sets the system default but does not export the var.
     --action_env=DEVELOPER_DIR="${DEVELOPER_DIR:-$(xcode-select -p)}"
     --action_env=MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-11.0}"
-    --//bazel/config:linkstatic=True
   )
   ;;
 
@@ -193,6 +198,17 @@ mkdir -p "${PREFIX}/bin"
 cp -v bazel-bin/install/bin/mongod "${PREFIX}/bin/mongod"
 cp -v bazel-bin/install/bin/mongos "${PREFIX}/bin/mongos"
 chmod +x "${PREFIX}/bin/mongod" "${PREFIX}/bin/mongos"
+
+# dynamic_lookup defers unresolved symbols to load time; fail here instead.
+if [ "$(uname -s)" = "Darwin" ]; then
+  for _bin in mongod mongos; do
+    if nm -m "${PREFIX}/bin/${_bin}" | grep -q "dynamically looked up"; then
+      echo "ERROR: ${_bin} has unresolved dynamic_lookup symbols" >&2
+      exit 1
+    fi
+  done
+  unset _bin
+fi
 
 # Remove bazel's large symlinked output trees.
 bazel clean --expunge || true
