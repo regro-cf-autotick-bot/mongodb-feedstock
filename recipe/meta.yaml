@@ -1,4 +1,4 @@
-{% set version = "8.0.23" %}
+{% set version = "8.3.7" %}
 
 package:
   name: mongodb
@@ -6,19 +6,17 @@ package:
 
 source:
   url: https://github.com/mongodb/mongo/archive/refs/tags/r{{ version }}.tar.gz
-  sha256: 11f28fb5f5f28ab69fb9818644f416b614580fb17bb7e46b6be93762c990b07d
+  sha256: d0179a61d3e126a6fce328db38e5f7568f24dfb1a33748d1b994b7fe641c7d88
   patches:
-    - patches/0001-community-remove-unguarded-enterprise-hdrs.patch
-    - patches/0002-disable-apple-toolchain-registration.patch  # [osx]
-    - patches/0003-add-rules-cc-bazel-dep.patch
-    - patches/0004-version-constants-gen-tolerate-cross-prefixed-compilers.patch
-    - patches/0005-mozjs-gate-comparison-operators-elementtype-for-msvc-14.4x.patch  # [win]
-    - patches/0006-mozjs-protecteddata-drop-redundant-operator-ne-cxx20.patch  # [win]
-    - patches/0007-resharding-util-split-nested-literals-for-msvc.patch  # [win]
+    - patches/0001-Disable-mongo_apple_toolchain-registration-for-native-macOS-builds.patch  # [osx]
+    - patches/0002-Make-tool_to_path-basename-check-tolerate-cross-prefixed-compilers.patch
+    - patches/0003-mozjs-gate-wrapper-comparison-operators-ElementType-behind-DefineComparisonOps-for-MSVC-14.4x.patch  # [win]
+    - patches/0004-mozjs-constrain-ProtectedData-for-C-20-MSVC-14.4x.patch  # [win]
+    - patches/0005-resharding_util-split-deeply-nested-pipeline-literals-to-avoid-MSVC-C1060.patch  # [win]
 build:
   number: 0
   # MongoDB distributes ppc64le only for Enterprise Edition
-  skip: True  # [ppc64le]
+  skip: true  # [ppc64le]
 
 requirements:
   build:
@@ -30,6 +28,9 @@ requirements:
     - bazel-toolchain  # [not win]
     - python >=3.10
     - pip
+    # Provides rg for the .auto_header generator invoked from build.sh, which
+    # calls it via RG_PATH. Without this package that step fails.
+    - ripgrep
   host:
     - openssl
     - libcurl
@@ -56,15 +57,13 @@ about:
     - distsrc/THIRD-PARTY-NOTICES
     - README.third_party.md
     - src/third_party/abseil-cpp/dist/LICENSE
-    - src/third_party/asio-master/asio/LICENSE_1_0.txt
-    - src/third_party/fmt/dist/LICENSE.rst
+    - src/third_party/fmt/dist/LICENSE
     - src/third_party/folly/dist/LICENSE
     - src/third_party/gperftools/dist/COPYING
     - src/third_party/icu4c-57.1/LICENSE
     - src/third_party/immer/dist/LICENSE
     - src/third_party/IntelRDFPMathLib20U1/eula.txt
     - src/third_party/libbson/dist/COPYING
-    - src/third_party/librdkafka/dist/LICENSE
     - src/third_party/pcre2/LICENCE
     - src/third_party/s2/LICENSE-2.0.txt
     - src/third_party/snappy/dist/COPYING

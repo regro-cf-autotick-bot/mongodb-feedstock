@@ -3,4 +3,6 @@ github_actions_labels:
 - namespace-profile-16cpu-on-linux-aarch64  # [linux and aarch64]
 - namespace-profile-16cpu-on-win-64   # [win]
 - namespace-profile-12cpu-on-osx-arm64  # [osx]
+c_stdlib_version:  # [linux]
+  - 2.28  # [linux]
 

@@ -25,6 +25,7 @@ set BAZEL_ARGS=^
  "--repo_env=BAZEL_VS=!VS_ROOT!" ^
  "--repo_env=BAZEL_VC=!VC_ROOT!" ^
  "--repo_env=BAZEL_VC_FULL_VERSION=!VC_VER!" ^
+ "--repo_env=BAZEL_WINSDK_FULL_VERSION=" ^
  --action_env=TMP=D:\mongo_tmp ^
  --action_env=TEMP=D:\mongo_tmp ^
  --repo_env=TMP=D:\mongo_tmp ^
@@ -44,6 +45,17 @@ if not exist D:\b mkdir D:\b
 
 REM Raise the 260-char path ceiling for long-path-aware tools; shoudl be set before bazel.
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
+
+REM MongoDB 8.3+ resolves header deps through per-package .auto_header/ Bazel
+REM packages, generated at build time from a ripgrep scan of the include graph.
+REM The generator only runs inside mongo's bazelisk wrapper, which we do not
+REM use, and its output is gitignored, so the release tarball has none. The
+REM helper resolves ripgrep from PATH and forces the offline fallbacks itself.
+REM Run it after the long-path registry tweak above.
+set "RG_PATH=rg"
+set "FORCE_NO_FD=1"
+python -c "import sys;sys.path.insert(0,'.');from pathlib import Path;from bazel.auto_header.auto_header import gen_auto_headers as g;from bazel.auto_header.gen_all_headers import spawn_all_headers_thread as s;r=Path.cwd();t,st=s(r);a=g(r);t.join();sys.exit(None if a['ok'] and st['ok'] else 'auto_header generation failed')"
+if errorlevel 1 exit /b 1
 
 REM Two passes: parallel build (some actions may OOM), then -j1 to finish from cache.
 bazel --output_user_root=D:\b build %BAZEL_ARGS% --//bazel/config:dbg=False --//bazel/config:opt=on --jobs=4 install-core
