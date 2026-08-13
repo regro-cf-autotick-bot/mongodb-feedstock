@@ -1,4 +1,4 @@
-{% set version = "8.3.7" %}
+{% set version = "8.3.8" %}
 
 package:
   name: mongodb
@@ -6,7 +6,7 @@ package:
 
 source:
   url: https://github.com/mongodb/mongo/archive/refs/tags/r{{ version }}.tar.gz
-  sha256: d0179a61d3e126a6fce328db38e5f7568f24dfb1a33748d1b994b7fe641c7d88
+  sha256: 3e7e9aa49290ab5c72704cfc7e4954b386b2188ecbc7544cb21a5e20068229df
   patches:
     - patches/0001-Disable-mongo_apple_toolchain-registration-for-native-macOS-builds.patch  # [osx]
     - patches/0002-Make-tool_to_path-basename-check-tolerate-cross-prefixed-compilers.patch
